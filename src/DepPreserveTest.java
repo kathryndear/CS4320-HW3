@@ -128,7 +128,10 @@ public class DepPreserveTest {
 		
 		
 		assertTrue(FDChecker.checkDepPres(t1, t2, fds));
-		//assertFalse(FDChecker.checkDepPres(a, t2, fds));
+		assertFalse(FDChecker.checkDepPres(a, t2, fds));
+		assertFalse(FDChecker.checkDepPres(t3, t4, fds));
+		assertFalse(FDChecker.checkDepPres(t4, t3, fds));
+		assertFalse(FDChecker.checkDepPres(a, t2, fds));
 		
 	}
 	

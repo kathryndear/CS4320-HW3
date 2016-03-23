@@ -28,7 +28,88 @@ public class FDChecker {
 		//		t = closure(t) intersect table
 		//		result = result union t
 		//if b is contained in result, the dependency is preserved
-		return false;
+		System.out.println("start function");
+		for (FunctionalDependency fd : fds) {
+			System.out.println("left: " + fd.left);
+			System.out.println("right: " + fd.right);
+		}
+		for (FunctionalDependency fd : fds) {
+			boolean result_changed = true;
+			AttributeSet result = new AttributeSet();
+			result = fd.left;
+			System.out.println("right: " + fd.right);
+			System.out.println("left: " + fd.left);
+			System.out.println("first check");
+			for (Attribute attr : result) {
+				System.out.println(attr);
+			}
+			while (result_changed) {
+				result_changed = false;
+				//first for X
+					AttributeSet temp1 = new AttributeSet();
+					AttributeSet intClose1 = new AttributeSet();
+					for (Attribute attr : result) {
+						temp1.add(attr);
+					}
+					temp1.retainAll(t1);
+					intClose1 = closure(temp1,fds);
+					System.out.println("intclose1");
+					for (Attribute attr : intClose1) {
+						System.out.println(attr);
+					}
+					intClose1.retainAll(t1);
+					for (Attribute attr : intClose1) {
+						if (!result.contains(attr)) {
+							result.add(attr);
+							result_changed = true;
+						}
+					}
+					System.out.println("after X");
+					for (Attribute attr : result) {
+						System.out.println(attr);
+					}
+				//next for Y
+					AttributeSet temp2 = new AttributeSet();
+					AttributeSet intClose2 = new AttributeSet();
+					for (Attribute attr : result) {
+						temp2.add(attr);
+					}
+					System.out.println("temp 2 before intersect");
+					for (Attribute attr : temp2) {
+						System.out.println(attr);
+					}
+					temp2.retainAll(t2);
+					System.out.println("temp 2 after intersect");
+					for (Attribute attr : temp2) {
+						System.out.println(attr);
+					}
+					intClose2 = closure(temp2,fds);
+					System.out.println("intclose2");
+					for (Attribute attr : intClose2) {
+						System.out.println(attr);
+					}
+					intClose2.retainAll(t2);
+					for (Attribute attr : intClose2) {
+						if (!result.contains(attr)) {
+						result.add(attr);
+						result_changed = true;
+						}
+					}
+					System.out.println("after Y");
+					for (Attribute attr : result) {
+						System.out.println(attr);
+					}
+			}
+			System.out.println("before check");
+			for (Attribute attr : result) {
+				System.out.println(attr);
+			}
+			//check if beta is in result
+			if (!result.contains(fd.right)) {
+					return false;
+				}				
+			}
+		return true;
 	}
 
 	/**

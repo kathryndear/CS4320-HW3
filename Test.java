@@ -122,7 +122,7 @@ public class Test {
 	}
 	
 	@org.junit.Test
-	public void test() {
+	public void testSuccess() {
 		AttributeSet t1 = new AttributeSet();
 		AttributeSet t2 = new AttributeSet();
 		
@@ -155,7 +155,7 @@ public class Test {
 	}
 	
 	@org.junit.Test
-	public void testSmall() {
+	public void testSmallFail() {
 		AttributeSet t1 = new AttributeSet();
 		AttributeSet t2 = new AttributeSet();
 		

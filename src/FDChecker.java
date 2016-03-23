@@ -16,7 +16,6 @@ public class FDChecker {
 	 * @return true if the decomposition is dependency preserving, false otherwise
 	 **/
 	public static boolean checkDepPres(AttributeSet t1, AttributeSet t2, Set<FunctionalDependency> fds) {
-		//your code here
 		//a decomposition is dependency preserving, if local functional dependencies are
 		//sufficient to enforce the global properties
 		//To check a particular functional dependency a -> b is preserved, 
@@ -32,8 +31,10 @@ public class FDChecker {
 		for (FunctionalDependency fd : fds) {
 			boolean result_changed = true;
 			AttributeSet result = new AttributeSet();
-			result = fd.left;
-		
+			for (Attribute attr : fd.left) {
+				result.add(attr);
+			}
+			
 			while (result_changed) {
 				result_changed = false;
 				//first for X

@@ -42,9 +42,9 @@ public class FDChecker {
 	 * @return true if the decomposition is lossless, false otherwise
 	 **/
 	public static boolean checkLossless(AttributeSet t1, AttributeSet t2, Set<FunctionalDependency> fds) {
-		Map<Attribute, Integer> attToInt = new HashMap();
-		Map<Integer, Attribute> intToAtt = new HashMap();
-		AttributeSet combined = new AttributeSet();
+		Map<Attribute, Integer> attToInt = new HashMap();	//maps attributes to indexes (columns) of a 2D array
+		Map<Integer, Attribute> intToAtt = new HashMap();   //maps indexes (columns) of 2D array to attributes
+		AttributeSet combined = new AttributeSet();			//combines the attr of each relation into one set
 		combined.addAll(t1);
 		combined.addAll(t2);
 		
@@ -55,36 +55,35 @@ public class FDChecker {
 			i++;
 		}
 		
+		//Array of the two relations
 		AttributeSet[] relations = new AttributeSet[2];
 		relations[0] = t1;
 		relations[1] = t2;
 		
+		//Table tracking valid attributes. Rows are the decomposed relations. Columns are attributes.
 		boolean[][] tableau = new boolean[2][combined.size()];
 		
-		//initialize trues
+		//For each relation, mark each attribute (column) as true if the attribute is in the relation. 
 		for(int r = 0; r < 2; r++) {
 			for(Attribute a : relations[r]) {
 				tableau[r][attToInt.get(a)] = true;
 			}
 		}
 		
-		for(FunctionalDependency f : fds) {
-			System.out.println("ORDER: " + f.right.name);
-		}
-		
-		printTable(tableau, attToInt);
-		
+		//This utilizes the CHASE ALGORITHM, see https://en.wikipedia.org/wiki/Chase_(algorithm)
 		boolean no_change = false;
 		while(!no_change) {
 			boolean[][] temp = cloneArray(tableau);
-			System.out.println("TEMP ________ START");
-			printTable(temp, attToInt);
-			
-			//find all functional dependencies such that the LHS has true in the top and bottom
-			//The following must be true:
-			//All two rows must have true for the columns relating to the LHS of a FD
-			//Only one row must have true for the columns relating to the RHS of a FD
+			/*
+			 * For each functional dependency:
+			 * The following must be true in order to change the cell corresponding to the attribute of 
+			 * the RHS of a FD:
+			 *	1. Both rows must have true for the columns relating to the LHS of a FD
+			 * 	2. Only one row must have true for the columns relating to the RHS of a FD
+			 */
 			for(FunctionalDependency f : fds) {
+				//indexes corresponds to the tableau columns associated with the attributes of the LHS
+				//for FD f. 
 				ArrayList<Integer> indexes = new ArrayList<Integer>();
 				AttributeSet left = f.left;
 				Attribute right = f.right;
@@ -92,36 +91,34 @@ public class FDChecker {
 					indexes.add(attToInt.get(a));
 				}
 				
-				System.out.println("Considering change for " + f.right.name);
-				
+				//If distinguished is true, then we can change the columns associated with the attributes of 
+				//the RHS for FD f to true. 
 				boolean distinguished = true;
 				for(int j = 0; j < indexes.size(); j++) {
+					//Check that both rows of the attr columns on the LHS for this FD is true
 					distinguished = distinguished && tableau[0][indexes.get(j)] && tableau[1][indexes.get(j)];
 				}
 				
+				//Check that only one of the rows of the attr columns on the RHS for this FD is true
 				if((tableau[0][attToInt.get(right)] && !tableau[1][attToInt.get(right)]) || 
 				   (!tableau[0][attToInt.get(right)] && tableau[1][attToInt.get(right)])) {
 					distinguished = distinguished && true;
 				}
 				
 				//if distinguished is true, then for this FD, we can set the RHS attribute column 
-				//to be all true
+				//to all be true
 				if(distinguished) {
-					System.out.println("Changed " + f.right.name);
 					tableau[0][attToInt.get(f.right)] = true;
 					tableau[1][attToInt.get(f.right)] = true;
 				}
-				printTable(tableau, attToInt);
 			}
 			
-			System.out.println("TEMP ________ END");
-			printTable(temp, attToInt);
-			
+			//Continue this process of checking all FDs until the table no longer changes.
 			if(equivalent(tableau, temp)) 
 				no_change = true;	
 		}
 		
-		
+		//If one of the rows of the table has all true, then the decomposition is lossless. 
 		for(int r = 0; r < 2; r++) {
 			boolean lossless = true;
 			for(int c = 0; c < combined.size(); c++) {
@@ -132,13 +129,6 @@ public class FDChecker {
 		}
 		
 		return false;
-		
-		
-		//your code here
-		//Lossless decompositions do not lose information, the natural join is equal to the 
-		//original table.
-		//a decomposition is lossless if the common attributes for a superkey for one of the
-		//tables.
 	}
 
 	//recommended helper method
